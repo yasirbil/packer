@@ -1,5 +1,5 @@
 node{
   stage("Test"){
-    println(env.BRANCH_NAME)
+    println(BRANCH_NAME)
   }
 }
