@@ -1,23 +1,22 @@
-def aws_region_var = ''
-def environment = ''
+properties([
+    parameters([
+        choice(choices: ['dev', 'qa', 'prod'], description: 'Choose Environment', name: 'environment')
+    ])
+])
 
-if(BRANCH_NAME ==~ "dev.*") {
+def aws_region_var = ''
+
+if(params.environment == "dev") {
     println("Applying Dev")
     aws_region_var = "us-east-1"
-    environment = 'dev'
 }
-else if(BRANCH_NAME ==~ "qa.*") {
+else if(params.environment == "qa") {
     println("Applying QA")
     aws_region_var = "us-east-2"
-    environment = 'qa'
 }
-else if(BRANCH_NAME == "master") {
+else if(params.environment == "prod") {
     println("Applying Prod")
     aws_region_var = "us-west-2"
-    environment = 'prod'
-}
-else {
-    error("Branch name didn't match RegEx")
 }
 
 node {
@@ -38,7 +37,7 @@ node {
             }   
 
             stage('Build EC2 Instance') {
-                build wait: false, job: 'terraform-ec2', parameters: [booleanParam(name: 'terraform_apply', value: true), booleanParam(name: 'terraform_destroy', value: false), string(name: 'environment', value: "${environment}"), string(name: 'ami_name', value: "${ami_name}")]
+                build wait: false, job: 'terraform-ec2', parameters: [booleanParam(name: 'terraform_apply', value: true), booleanParam(name: 'terraform_destroy', value: false), string(name: 'environment', value: "${params.environment}"), string(name: 'ami_name', value: "${ami_name}")]
             }
         }     
     }
